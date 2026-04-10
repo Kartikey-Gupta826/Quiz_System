@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
-  process.env.FRONTEND_URL || 'https://quiz-system-xeiz.onrender.com'
+  process.env.FRONTEND_URL || 'https://quiz-system-bzva.onrender.com'
 ];
 
 app.use(cors({
