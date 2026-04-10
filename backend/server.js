@@ -7,8 +7,26 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS configuration - allow both development and production origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  process.env.FRONTEND_URL || 'https://quiz-system-xeiz.onrender.com'
+];
+
 app.use(cors({
-  origin: "https://quiz-system-xeiz.onrender.com"
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`[CORS] Blocked request from: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
 
 // ── Middleware ──
