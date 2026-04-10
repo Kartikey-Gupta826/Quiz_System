@@ -70,7 +70,7 @@
       }).join('') : '<p class="empty-state">No quizzes found.</p>';
     }
 
-    fetch('${BASE_URL}/api/quizzes')
+    fetch(`${BASE_URL}/api/quizzes`)
       .then(r => r.json())
       .then(data => {
         allQuizzes = data;

@@ -239,7 +239,7 @@
       localStorage.setItem('quizhub_scores', JSON.stringify(localScores));
 
       // Post to server leaderboard
-      fetch('${BASE_URL}/api/leaderboard', {
+      fetch(`${BASE_URL}/api/leaderboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entry)
