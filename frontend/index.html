@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QuizHub – Online Quiz Platform</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap"
+    rel="stylesheet" />
 </head>
+
 <body>
   <!-- NAV -->
   <nav class="navbar">
@@ -27,8 +31,10 @@
       <h1>Test Your Knowledge.<br /><span class="accent">Dominate</span> the Leaderboard.</h1>
       <p class="hero-sub">Topic-wise quizzes with real-time timer, instant scoring, and detailed review.</p>
       <div class="hero-actions">
-        <button class="btn-primary large" onclick="window.location.href='pages/quiz-list.html'">Browse Quizzes →</button>
-        <button class="btn-ghost large" onclick="window.location.href='pages/leaderboard.html'">View Leaderboard</button>
+        <button class="btn-primary large" onclick="window.location.href='pages/quiz-list.html'">Browse Quizzes
+          →</button>
+        <button class="btn-ghost large" onclick="window.location.href='pages/leaderboard.html'">View
+          Leaderboard</button>
       </div>
       <div class="hero-stats">
         <div class="stat"><span class="stat-num" id="total-quizzes">5</span><span>Quizzes</span></div>
@@ -65,10 +71,26 @@
   <section class="how-section">
     <h2>How It Works</h2>
     <div class="steps">
-      <div class="step"><div class="step-num">01</div><h3>Choose a Topic</h3><p>Pick from HTML, CSS, JavaScript, Databases, or Networking.</p></div>
-      <div class="step"><div class="step-num">02</div><h3>Answer Questions</h3><p>Beat the timer. Each question has 30 seconds. Choose wisely.</p></div>
-      <div class="step"><div class="step-num">03</div><h3>Get Your Score</h3><p>Instant results with explanations for every question.</p></div>
-      <div class="step"><div class="step-num">04</div><h3>Climb the Board</h3><p>Your score gets saved. Compete with classmates.</p></div>
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Choose a Topic</h3>
+        <p>Pick from HTML, CSS, JavaScript, Databases, or Networking.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Answer Questions</h3>
+        <p>Beat the timer. Each question has 30 seconds. Choose wisely.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Get Your Score</h3>
+        <p>Instant results with explanations for every question.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Climb the Board</h3>
+        <p>Your score gets saved. Compete with classmates.</p>
+      </div>
     </div>
   </section>
 
@@ -76,29 +98,31 @@
     <p>QuizHub · Department of CSE · Bharati Vidyapeeth's College of Engineering, New Delhi</p>
     <p><a href="https://github.com/Kartikey-Gupta826" target="_blank">GitHub_Kartikey</a>
       |
-       <a href="" target="_blank">Github_Uneeb</a>
+      <a href="" target="_blank">Github_Uneeb</a>
     </p>
   </footer>
 
   <script src="js/main.js"></script>
   <script>
+    const BASE_URL = "https://quiz-system-xeiz.onrender.com";
+
     // Load topic cards from API
     const topicsGrid = document.getElementById('topics-grid');
     const topicMeta = {
-      html:       { icon: '🌐', color: 'orange', desc: '10 questions on tags, semantics & structure' },
-      css:        { icon: '🎨', color: 'blue',   desc: '10 questions on selectors, flexbox & grid' },
+      html: { icon: '🌐', color: 'orange', desc: '10 questions on tags, semantics & structure' },
+      css: { icon: '🎨', color: 'blue', desc: '10 questions on selectors, flexbox & grid' },
       javascript: { icon: '⚡', color: 'yellow', desc: '10 questions on ES6+, DOM & async' },
-      databases:  { icon: '🗄️', color: 'green',  desc: '10 questions on SQL, indexing & normalization' },
+      databases: { icon: '🗄️', color: 'green', desc: '10 questions on SQL, indexing & normalization' },
       networking: { icon: '🔗', color: 'purple', desc: '10 questions on HTTP, TCP/IP & DNS' },
     };
 
-    fetch('/api/quizzes')
+    fetch(`${BASE_URL}/api/quizzes`)
       .then(r => r.json())
       .then(data => {
         document.getElementById('total-quizzes').textContent = data.length;
-        document.getElementById('total-questions').textContent = data.reduce((s,q)=>s+q.questionCount,0);
+        document.getElementById('total-questions').textContent = data.reduce((s, q) => s + q.questionCount, 0);
         topicsGrid.innerHTML = data.map(q => {
-          const m = topicMeta[q.id] || { icon:'📚', color:'gray', desc:'' };
+          const m = topicMeta[q.id] || { icon: '📚', color: 'gray', desc: '' };
           return `<div class="topic-card ${m.color}" onclick="window.location.href='pages/quiz.html?id=${q.id}'">
             <span class="topic-icon">${m.icon}</span>
             <h3>${q.title}</h3>
@@ -112,11 +136,12 @@
         topicsGrid.innerHTML = '<p class="error-msg">⚠️ Could not load quizzes. Make sure the server is running.</p>';
       });
 
-    fetch('/api/leaderboard')
+    fetch(`${BASE_URL}/api/leaderboard`)
       .then(r => r.json())
       .then(data => {
-        document.getElementById('total-players').textContent = [...new Set(data.map(e=>e.name))].length;
-      }).catch(()=>{});
+        document.getElementById('total-players').textContent = [...new Set(data.map(e => e.name))].length;
+      }).catch(() => { });
   </script>
 </body>
+
 </html>

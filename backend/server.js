@@ -3,9 +3,13 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors({
+  origin: "https://quiz-system-xeiz.onrender.com"
+}));
 
 // ── Middleware ──
 app.use(express.json());
