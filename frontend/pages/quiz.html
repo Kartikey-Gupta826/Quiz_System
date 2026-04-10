@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuizHub</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand" onclick="window.location.href='../index.html'" style="cursor:pointer">Quiz<span>Hub</span></div>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="quiz-list.html">Quizzes</a>
+      <a href="leaderboard.html">Leaderboard</a>
+    </div>
+    <button class="btn-danger" id="quit-btn" style="display:none" onclick="confirmQuit()">Quit</button>
+  </nav>
+
+  <!-- START SCREEN -->
+  <div class="start-overlay" id="start-screen">
+    <div class="start-card">
+      <h2 id="start-title">Loading...</h2>
+      <p id="start-desc"></p>
+      <div class="quiz-info-tags" id="quiz-info-tags"></div>
+      <input type="text" class="name-input" id="player-name" placeholder="Enter your name" maxlength="30" />
+      <p id="name-error" style="color:var(--red);font-size:0.82rem;margin-bottom:0.8rem;display:none">Please enter your name to begin.</p>
+      <button class="btn-primary large" style="width:100%" onclick="startQuiz()">Start Quiz →</button>
+      <button class="btn-ghost" style="width:100%;margin-top:0.7rem" onclick="window.location.href='quiz-list.html'">← Back to List</button>
+    </div>
+  </div>
+
+  <!-- QUIZ ENGINE -->
+  <div class="quiz-wrapper" id="quiz-screen" style="display:none">
+    <div class="quiz-topbar">
+      <span class="quiz-topic-label" id="quiz-topic-label">Topic</span>
+      <div class="timer-box" id="timer-box">⏱ <span id="timer-display">30</span>s</div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-label">
+        <span id="progress-text">Question 1 of 10</span>
+        <span id="score-text">Score: 0</span>
+      </div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-num" id="question-num">Question 1</div>
+      <p class="question-text" id="question-text"></p>
+    </div>
+
+    <div class="feedback-bar" id="feedback-bar"></div>
+
+    <div class="options-list" id="options-list"></div>
+
+    <div class="quiz-controls" style="margin-top:1.5rem">
+      <button class="btn-primary" id="next-btn" style="display:none" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+
+  <!-- Quit Modal -->
+  <div class="modal-overlay" id="quit-modal">
+    <div class="modal">
+      <h3>Quit Quiz?</h3>
+      <p style="color:var(--muted);font-size:0.9rem">Your progress will be lost. Are you sure?</p>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="document.getElementById('quit-modal').classList.remove('open')">Continue</button>
+        <button class="btn-danger" onclick="window.location.href='quiz-list.html'">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const quizId = params.get('id');
+    if (!quizId) window.location.href = 'quiz-list.html';
+
+    let quiz = null;
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let playerName = '';
+    let timerInterval = null;
+    let timeLeft = 30;
+    let answered = false;
+    let userAnswers = [];
+
+    // Load quiz meta
+    fetch(`/api/quizzes/${quizId}`)
+      .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
+      .then(data => {
+        quiz = data;
+        document.title = `${quiz.title} – QuizHub`;
+        document.getElementById('start-title').textContent = quiz.title;
+        document.getElementById('start-desc').textContent = quiz.description;
+        document.getElementById('quiz-topic-label').textContent = quiz.title;
+        document.getElementById('quiz-info-tags').innerHTML = `
+          <span class="info-tag">📝 ${quiz.questionCount} questions</span>
+          <span class="info-tag">⏱ ${quiz.timePerQuestion}s each</span>
+          <span class="info-tag difficulty-badge ${quiz.difficulty}">${quiz.difficulty}</span>
+        `;
+      })
+      .catch(() => { alert('Quiz not found!'); window.location.href='quiz-list.html'; });
+
+    function startQuiz() {
+      playerName = document.getElementById('player-name').value.trim();
+      if (!playerName) {
+        document.getElementById('name-error').style.display = 'block';
+        return;
+      }
+      document.getElementById('name-error').style.display = 'none';
+
+      fetch(`/api/quizzes/${quizId}/questions`)
+        .then(r => r.json())
+        .then(data => {
+          questions = data;
+          document.getElementById('start-screen').style.display = 'none';
+          document.getElementById('quiz-screen').style.display = 'block';
+          document.getElementById('quit-btn').style.display = 'block';
+          renderQuestion();
+        })
+        .catch(() => alert('Failed to load questions!'));
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const q = questions[currentIndex];
+      document.getElementById('question-num').textContent = `Question ${currentIndex + 1}`;
+      document.getElementById('question-text').innerHTML = q.question;
+      document.getElementById('progress-text').textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById('score-text').textContent = `Score: ${score}`;
+      document.getElementById('progress-fill').style.width = `${((currentIndex) / questions.length) * 100}%`;
+      document.getElementById('feedback-bar').className = 'feedback-bar';
+      document.getElementById('next-btn').style.display = 'none';
+
+      // Render options
+      const labels = ['A', 'B', 'C', 'D'];
+      document.getElementById('options-list').innerHTML = q.options.map((opt, i) =>
+        `<button class="option-btn" id="opt-${i}" onclick="selectOption(${i})">
+          <span class="option-label">${labels[i]}</span>${opt}
+        </button>`
+      ).join('');
+
+      startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = quiz.timePerQuestion || 30;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          if (!answered) timeUp();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const el = document.getElementById('timer-display');
+      const box = document.getElementById('timer-box');
+      el.textContent = timeLeft;
+      if (timeLeft <= 10) { box.classList.add('urgent'); }
+      else { box.classList.remove('urgent'); }
+    }
+
+    function timeUp() {
+      answered = true;
+      const q = questions[currentIndex];
+      userAnswers.push({ question: q.question, chosen: -1, correct: q.correctIndex, options: q.options, explanation: q.explanation });
+      showFeedback(false, -1, q.correctIndex, q.explanation);
+      disableOptions();
+    }
+
+    function selectOption(idx) {
+      if (answered) return;
+      answered = true;
+      clearInterval(timerInterval);
+      const q = questions[currentIndex];
+      const isCorrect = idx === q.correctIndex;
+      if (isCorrect) score++;
+      userAnswers.push({ question: q.question, chosen: idx, correct: q.correctIndex, options: q.options, explanation: q.explanation });
+      showFeedback(isCorrect, idx, q.correctIndex, q.explanation);
+      disableOptions();
+    }
+
+    function showFeedback(isCorrect, chosen, correctIdx, explanation) {
+      const bar = document.getElementById('feedback-bar');
+      if (chosen === -1) {
+        bar.className = 'feedback-bar wrong';
+        bar.innerHTML = `⏰ Time's up! Correct answer: <strong>${questions[currentIndex].options[correctIdx]}</strong>`;
+      } else if (isCorrect) {
+        bar.className = 'feedback-bar correct';
+        bar.innerHTML = `✓ Correct! ${explanation || ''}`;
+      } else {
+        bar.className = 'feedback-bar wrong';
+        bar.innerHTML = `✗ Wrong. Correct answer: <strong>${questions[currentIndex].options[correctIdx]}</strong>. ${explanation || ''}`;
+      }
+      // Highlight buttons
+      document.querySelectorAll('.option-btn').forEach((btn, i) => {
+        if (i === correctIdx) btn.classList.add('correct');
+        else if (i === chosen && !isCorrect) btn.classList.add('wrong');
+      });
+      document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function disableOptions() {
+      document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex >= questions.length) {
+        finishQuiz();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function finishQuiz() {
+      clearInterval(timerInterval);
+      // Save score
+      const entry = {
+        quizId, quizTitle: quiz.title,
+        name: playerName, score, correct: score,
+        total: questions.length, timestamp: Date.now(),
+        percentage: Math.round((score / questions.length) * 100)
+      };
+      // Save locally for best scores
+      const localScores = JSON.parse(localStorage.getItem('quizhub_scores') || '[]');
+      localScores.push(entry);
+      localStorage.setItem('quizhub_scores', JSON.stringify(localScores));
+
+      // Post to server leaderboard
+      fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry)
+      }).catch(() => {});
+
+      // Save answers for review, redirect to results
+      sessionStorage.setItem('quizhub_result', JSON.stringify({ entry, answers: userAnswers }));
+      window.location.href = 'results.html';
+    }
+
+    function confirmQuit() {
+      document.getElementById('quit-modal').classList.add('open');
+    }
+
+    // Allow Enter key on name input
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const nameInput = document.getElementById('player-name');
+        if (nameInput) nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startQuiz(); });
+      }, 500);
+    });
+  </script>
+</body>
+</html>

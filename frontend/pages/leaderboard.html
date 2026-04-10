@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard – QuizHub</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand" onclick="window.location.href='../index.html'" style="cursor:pointer">Quiz<span>Hub</span></div>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="quiz-list.html">Quizzes</a>
+      <a href="leaderboard.html" class="active">Leaderboard</a>
+      <a href="admin.html">Admin</a>
+    </div>
+    <button class="btn-primary" onclick="window.location.href='quiz-list.html'">Play →</button>
+  </nav>
+
+  <div class="page-header">
+    <h1>Leaderboard</h1>
+    <p>Top performers across all quizzes</p>
+  </div>
+
+  <div class="leaderboard-wrapper">
+    <div class="filter-bar" id="lb-filter" style="padding:0 0 1.5rem">
+      <button class="filter-btn active" data-filter="all">All Topics</button>
+    </div>
+
+    <div id="podium-area"></div>
+
+    <div id="lb-table-area">
+      <p class="loading">Loading leaderboard...</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>QuizHub.BVCOE</p>
+  </footer>
+
+  <script>
+    let allEntries = [];
+    let activeFilter = 'all';
+
+    function getInitials(name) {
+      return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function renderPodium(entries) {
+      const area = document.getElementById('podium-area');
+      if (entries.length < 1) { area.innerHTML = ''; return; }
+      const top3 = entries.slice(0, 3);
+      const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3.length === 2 ? [top3[1], top3[0]] : [top3[0]];
+      const classes = top3.length >= 3 ? ['second', 'first', 'third'] : top3.length === 2 ? ['second', 'first'] : ['first'];
+      const medals = ['🥈', '🥇', '🥉'];
+
+      area.innerHTML = `<div class="podium">
+        ${podiumOrder.map((p, i) => `
+          <div class="podium-item ${classes[i]}">
+            <div class="podium-rank">${medals[i]}</div>
+            <div class="podium-avatar">${getInitials(p.name)}</div>
+            <div class="podium-name">${p.name}</div>
+            <div class="podium-score">${p.percentage}%</div>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+
+    function renderTable(entries) {
+      const area = document.getElementById('lb-table-area');
+      if (!entries.length) {
+        area.innerHTML = '<p class="empty-state">No scores yet. Be the first to play!</p>';
+        return;
+      }
+      area.innerHTML = `<table class="lb-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>Quiz</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map((e, i) => `
+            <tr>
+              <td class="rank-cell">${i + 1}</td>
+              <td class="name-cell">${e.name}</td>
+              <td><span class="topic-pill">${e.quizTitle || e.quizId}</span></td>
+              <td class="score-cell">${e.correct}/${e.total}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.6rem">
+                  <div style="flex:1;height:6px;background:var(--border);border-radius:3px;min-width:60px">
+                    <div style="height:100%;background:${e.percentage>=75?'var(--green)':e.percentage>=50?'var(--yellow)':'var(--red)'};border-radius:3px;width:${e.percentage}%"></div>
+                  </div>
+                  <span style="font-size:0.82rem;min-width:36px">${e.percentage}%</span>
+                </div>
+              </td>
+              <td style="color:var(--muted);font-size:0.8rem">${new Date(e.timestamp).toLocaleDateString()}</td>
+            </tr>`
+          ).join('')}
+        </tbody>
+      </table>`;
+    }
+
+    fetch('/api/leaderboard')
+      .then(r => r.json())
+      .then(data => {
+        allEntries = data.sort((a, b) => b.percentage - a.percentage || b.correct - a.correct);
+
+        // Build topic filters
+        const topics = ['all', ...new Set(data.map(e => e.quizTitle || e.quizId))];
+        const filterBar = document.getElementById('lb-filter');
+        filterBar.innerHTML = topics.map(t =>
+          `<button class="filter-btn${t==='all'?' active':''}" data-filter="${t}">${t === 'all' ? 'All Topics' : t}</button>`
+        ).join('');
+        filterBar.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.dataset.filter;
+            const filtered = activeFilter === 'all' ? allEntries : allEntries.filter(e => (e.quizTitle||e.quizId) === activeFilter);
+            renderPodium(filtered);
+            renderTable(filtered);
+          });
+        });
+
+        renderPodium(allEntries);
+        renderTable(allEntries);
+      })
+      .catch(() => {
+        document.getElementById('lb-table-area').innerHTML = '<p class="error-msg">⚠️ Could not load leaderboard. Make sure the server is running.</p>';
+      });
+  </script>
+</body>
+</html>

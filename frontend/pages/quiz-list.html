@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quizzes – QuizHub</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand" onclick="window.location.href='../index.html'" style="cursor:pointer">Quiz<span>Hub</span></div>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="quiz-list.html" class="active">Quizzes</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="admin.html">Admin</a>
+    </div>
+    <button class="btn-ghost" onclick="window.location.href='../index.html'">← Back</button>
+  </nav>
+
+  <div class="page-header">
+    <h1>All Quizzes</h1>
+    <p>Choose a topic and test your knowledge. Timer starts when you begin.</p>
+  </div>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-filter="all">All Topics</button>
+  </div>
+
+  <div class="quiz-list" id="quiz-list">
+    <p class="loading">Loading quizzes...</p>
+  </div>
+
+  <footer class="footer">
+    <p>QuizHub.BVCOE</p>
+  </footer>
+
+  <script>
+    const scores = JSON.parse(localStorage.getItem('quizhub_scores') || '[]');
+    const filterBar = document.getElementById('filter-bar');
+    const quizList = document.getElementById('quiz-list');
+    let allQuizzes = [];
+    let activeFilter = 'all';
+
+    function getBest(quizId) {
+      const entries = scores.filter(s => s.quizId === quizId);
+      if (!entries.length) return null;
+      return Math.max(...entries.map(e => Math.round((e.correct / e.total) * 100)));
+    }
+
+    function render(quizzes) {
+      const diffClass = { easy: 'easy', medium: 'medium', hard: 'hard' };
+      quizList.innerHTML = quizzes.length ? quizzes.map(q => {
+        const best = getBest(q.id);
+        return `<div class="quiz-item" onclick="window.location.href='quiz.html?id=${q.id}'">
+          <div class="quiz-item-header">
+            <h3>${q.title}</h3>
+            <span class="difficulty-badge ${diffClass[q.difficulty] || 'medium'}">${q.difficulty}</span>
+          </div>
+          <p>${q.description}</p>
+          <div class="quiz-item-meta">
+            <span>⏱ ${q.timePerQuestion}s/question</span>
+            <span>📝 ${q.questionCount} questions</span>
+          </div>
+          ${best !== null ? `<div class="best-score">Best: ${best}%</div>` : ''}
+          <button class="btn-primary" style="margin-top:0.8rem">Start Quiz →</button>
+        </div>`;
+      }).join('') : '<p class="empty-state">No quizzes found.</p>';
+    }
+
+    fetch('/api/quizzes')
+      .then(r => r.json())
+      .then(data => {
+        allQuizzes = data;
+        // Build filters
+        const topics = ['all', ...new Set(data.map(q => q.category || q.id))];
+        filterBar.innerHTML = topics.map(t =>
+          `<button class="filter-btn${t==='all'?' active':''}" data-filter="${t}">${t==='all'?'All Topics': t.charAt(0).toUpperCase()+t.slice(1)}</button>`
+        ).join('');
+        filterBar.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.dataset.filter;
+            const filtered = activeFilter === 'all' ? allQuizzes : allQuizzes.filter(q => (q.category||q.id) === activeFilter);
+            render(filtered);
+          });
+        });
+        render(data);
+      })
+      .catch(() => {
+        quizList.innerHTML = '<p class="error-msg">⚠️ Could not load quizzes. Make sure the server is running on port 3000.</p>';
+      });
+  </script>
+</body>
+</html>

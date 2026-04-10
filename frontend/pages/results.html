@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Results – QuizHub</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand" onclick="window.location.href='../index.html'" style="cursor:pointer">Quiz<span>Hub</span></div>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="quiz-list.html">Quizzes</a>
+      <a href="leaderboard.html">Leaderboard</a>
+    </div>
+  </nav>
+
+  <div class="results-wrapper" id="results-wrapper">
+    <p class="loading">Loading results...</p>
+  </div>
+
+  <script>
+    const raw = sessionStorage.getItem('quizhub_result');
+    if (!raw) { window.location.href = 'quiz-list.html'; }
+
+    const { entry, answers } = JSON.parse(raw);
+    const pct = entry.percentage;
+
+    let grade, gradeColor, emoji;
+    if (pct >= 90)      { grade='A+'; gradeColor='var(--green)'; emoji='🏆'; }
+    else if (pct >= 75) { grade='A';  gradeColor='var(--green)'; emoji='🎉'; }
+    else if (pct >= 60) { grade='B';  gradeColor='var(--yellow)'; emoji='👍'; }
+    else if (pct >= 45) { grade='C';  gradeColor='var(--orange)'; emoji='🤔'; }
+    else                { grade='F';  gradeColor='var(--red)'; emoji='📖'; }
+
+    const correct = answers.filter(a => a.chosen === a.correct).length;
+    const wrong   = answers.filter(a => a.chosen !== -1 && a.chosen !== a.correct).length;
+    const skipped = answers.filter(a => a.chosen === -1).length;
+
+    const wrapper = document.getElementById('results-wrapper');
+    wrapper.innerHTML = `
+      <div style="margin-bottom:1rem;font-size:0.85rem;color:var(--muted)">${emoji} Well done, <strong style="color:var(--text)">${entry.name}</strong>!</div>
+
+      <div class="score-circle" style="border-color:${gradeColor}">
+        <span class="score-big" style="color:${gradeColor}">${pct}%</span>
+        <span class="score-total">${correct}/${entry.total}</span>
+      </div>
+
+      <div class="results-title">${grade} Grade</div>
+      <p class="results-sub">${entry.quizTitle} · ${new Date(entry.timestamp).toLocaleDateString()}</p>
+
+      <div class="results-stats">
+        <div class="res-stat">
+          <div class="label">Correct</div>
+          <div class="value green">${correct}</div>
+        </div>
+        <div class="res-stat">
+          <div class="label">Wrong</div>
+          <div class="value red">${wrong}</div>
+        </div>
+        <div class="res-stat">
+          <div class="label">Skipped</div>
+          <div class="value yellow">${skipped}</div>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn-primary large" onclick="window.location.href='quiz.html?id=${entry.quizId}'">Retry Quiz</button>
+        <button class="btn-ghost large" onclick="window.location.href='quiz-list.html'">More Quizzes</button>
+        <button class="btn-ghost large" onclick="window.location.href='leaderboard.html'">Leaderboard</button>
+      </div>
+
+      <div class="review-section">
+        <h3>Review – All Questions</h3>
+        ${answers.map((a, i) => {
+          const isCorrect = a.chosen === a.correct;
+          const wasSkipped = a.chosen === -1;
+          const icon = isCorrect ? '✓' : (wasSkipped ? '⏰' : '✗');
+          const chosenText = wasSkipped ? 'Time up / Skipped' : a.options[a.chosen];
+          const correctText = a.options[a.correct];
+          return `
+          <div class="review-item">
+            <div class="q-text">${icon} Q${i+1}: ${a.question}</div>
+            <div class="answer-row">
+              <span class="your-ans ${isCorrect?'correct':'wrong'}">Your answer: ${chosenText}</span>
+              ${!isCorrect ? `<span class="correct-ans">Correct: ${correctText}</span>` : ''}
+            </div>
+            ${a.explanation ? `<div class="explanation">💡 ${a.explanation}</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  </script>
+</body>
+</html>

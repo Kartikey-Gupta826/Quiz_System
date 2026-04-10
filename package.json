@@ -1,0 +1,27 @@
+{
+  "name": "quizhub-backend",
+  "version": "1.0.0",
+  "description": "QuizHub Online Quiz Platform – Web Tech Lab PBL Project",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.1",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "quiz",
+    "web-technologies",
+    "pbl",
+    "express",
+    "nodejs"
+  ],
+  "author": "CSE Students – Bharati Vidyapeeth",
+  "license": "MIT"
+}

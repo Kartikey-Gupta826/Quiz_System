@@ -1,0 +1,22 @@
+[
+  {
+    "id": "e3f63faa-7591-4620-ac4f-d93c48a9f7f1",
+    "name": "Kartik",
+    "quizId": "html",
+    "quizTitle": "HTML Fundamentals",
+    "correct": 1,
+    "total": 10,
+    "percentage": 10,
+    "timestamp": 1775829501569
+  },
+  {
+    "id": "2e1e375d-721f-4378-8302-ae52796b73cd",
+    "name": "Uneeb",
+    "quizId": "html",
+    "quizTitle": "HTML Fundamentals",
+    "correct": 5,
+    "total": 10,
+    "percentage": 50,
+    "timestamp": 1775829572186
+  }
+]

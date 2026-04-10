@@ -1,0 +1,42 @@
+[
+  {
+    "id": "html",
+    "title": "HTML Fundamentals",
+    "description": "Test your knowledge of HTML5 tags, semantics, forms, and accessibility.",
+    "category": "html",
+    "difficulty": "easy",
+    "timePerQuestion": 30
+  },
+  {
+    "id": "css",
+    "title": "CSS Mastery",
+    "description": "Questions on selectors, specificity, Flexbox, Grid, and responsive design.",
+    "category": "css",
+    "difficulty": "medium",
+    "timePerQuestion": 30
+  },
+  {
+    "id": "javascript",
+    "title": "JavaScript Deep Dive",
+    "description": "ES6+, closures, prototypes, async/await, and DOM manipulation.",
+    "category": "javascript",
+    "difficulty": "hard",
+    "timePerQuestion": 30
+  },
+  {
+    "id": "databases",
+    "title": "Database Concepts",
+    "description": "SQL queries, normalization, indexing, transactions, and NoSQL basics.",
+    "category": "databases",
+    "difficulty": "medium",
+    "timePerQuestion": 30
+  },
+  {
+    "id": "networking",
+    "title": "Computer Networking",
+    "description": "HTTP, TCP/IP, DNS, OSI model, REST APIs, and web security basics.",
+    "category": "networking",
+    "difficulty": "medium",
+    "timePerQuestion": 30
+  }
+]

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – QuizHub</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+  <div id="admin-login">
+    <h2>Admin Login</h2>
+    <input type="password" id="admin-pass" placeholder="Enter password" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="admin-panel" style="display: none;">
+    <nav class="navbar">
+      <div class="nav-brand" onclick="window.location.href='../index.html'" style="cursor:pointer">Quiz<span>Hub</span>
+      </div>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="quiz-list.html">Quizzes</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="admin.html" class="active">Admin</a>
+      </div>
+      <span class="badge" style="font-size:0.75rem">Admin Panel</span>
+    </nav>
+
+    <div class="page-header">
+      <h1>Admin Panel</h1>
+      <p>Manage quizzes, questions, and view analytics</p>
+    </div>
+
+    <div class="admin-wrapper">
+      <!-- Stats -->
+      <div class="stats-grid" id="admin-stats">
+        <div class="stat-card">
+          <div class="s-label">Total Quizzes</div>
+          <div class="s-val" id="stat-quizzes">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">Total Questions</div>
+          <div class="s-val" id="stat-questions">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">Leaderboard Entries</div>
+          <div class="s-val" id="stat-entries">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">Unique Players</div>
+          <div class="s-val" id="stat-players">-</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchTab('questions')">Questions</div>
+        <div class="admin-tab" onclick="switchTab('add')">Add Question</div>
+        <div class="admin-tab" onclick="switchTab('leaderboard')">Leaderboard</div>
+      </div>
+
+      <!-- QUESTIONS TAB -->
+      <div id="tab-questions">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <select id="quiz-filter-select"
+            style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.8rem;border-radius:var(--radius);font-size:0.87rem">
+            <option value="all">All Quizzes</option>
+          </select>
+          <span id="q-count" style="font-size:0.82rem;color:var(--muted)"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table" id="questions-table">
+            <thead>
+              <tr>
+                <th>Quiz</th>
+                <th>Question</th>
+                <th>Options</th>
+                <th>Correct</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="questions-tbody">
+              <tr>
+                <td colspan="5" style="color:var(--muted);text-align:center;padding:2rem">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD QUESTION TAB -->
+      <div id="tab-add" style="display:none">
+        <div class="add-question-form">
+          <h3 style="font-size:1rem;margin-bottom:1.2rem">Add New Question</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Quiz / Topic</label>
+              <select id="add-quiz-id">
+                <option value="">Select quiz...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Difficulty</label>
+              <select id="add-difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:1rem">
+            <label>Question Text</label>
+            <textarea id="add-question" rows="3" placeholder="Enter the question..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Option A</label><input type="text" id="opt-0" placeholder="Option A" /></div>
+            <div class="form-group"><label>Option B</label><input type="text" id="opt-1" placeholder="Option B" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Option C</label><input type="text" id="opt-2" placeholder="Option C" /></div>
+            <div class="form-group"><label>Option D</label><input type="text" id="opt-3" placeholder="Option D" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Correct Answer</label>
+              <select id="add-correct">
+                <option value="0">A</option>
+                <option value="1">B</option>
+                <option value="2">C</option>
+                <option value="3">D</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Explanation (optional)</label>
+              <input type="text" id="add-explanation" placeholder="Why is this the correct answer?" />
+            </div>
+          </div>
+          <div style="display:flex;gap:0.8rem;margin-top:0.5rem">
+            <button class="btn-primary" onclick="addQuestion()">Add Question</button>
+            <button class="btn-ghost" onclick="clearForm()">Clear</button>
+          </div>
+          <p id="add-msg" style="font-size:0.85rem;margin-top:0.8rem;display:none"></p>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD TAB -->
+      <div id="tab-leaderboard" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <span style="font-size:0.85rem;color:var(--muted)">All submitted scores</span>
+          <button class="btn-ghost" style="font-size:0.8rem" onclick="clearLeaderboard()">Clear All</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table" id="lb-admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Quiz</th>
+                <th>Score</th>
+                <th>%</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="lb-admin-tbody">
+              <tr>
+                <td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>QuizHub.BVCOE</p>
+    </footer>
+  </div>
+  <script>
+    let allQuizzes = [], allQuestions = [];
+
+    function switchTab(name) {
+      document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+      document.getElementById(`tab-${name}`).style.display = 'block';
+      document.querySelectorAll('.admin-tab').forEach((t, i) => {
+        t.classList.toggle('active', ['questions', 'add', 'leaderboard'][i] === name);
+      });
+      if (name === 'leaderboard') loadLBTab();
+    }
+
+    // Load quizzes & questions
+    Promise.all([fetch('/api/quizzes').then(r => r.json()), fetch('/api/admin/questions').then(r => r.json())])
+      .then(([quizzes, questions]) => {
+        allQuizzes = quizzes;
+        allQuestions = questions;
+
+        // Populate select elements
+        const opts = quizzes.map(q => `<option value="${q.id}">${q.title}</option>`).join('');
+        document.getElementById('quiz-filter-select').innerHTML = '<option value="all">All Quizzes</option>' + opts;
+        document.getElementById('add-quiz-id').innerHTML = '<option value="">Select quiz...</option>' + opts;
+
+        // Stats
+        document.getElementById('stat-quizzes').textContent = quizzes.length;
+        document.getElementById('stat-questions').textContent = questions.length;
+
+        renderQuestionsTable(questions);
+
+        // Filter
+        document.getElementById('quiz-filter-select').addEventListener('change', function () {
+          const val = this.value;
+          const filtered = val === 'all' ? allQuestions : allQuestions.filter(q => q.quizId === val);
+          renderQuestionsTable(filtered);
+        });
+      })
+      .catch(() => {
+        document.getElementById('questions-tbody').innerHTML = '<tr><td colspan="5" class="error-msg">Server not running?</td></tr>';
+      });
+
+    fetch('/api/leaderboard').then(r => r.json()).then(data => {
+      document.getElementById('stat-entries').textContent = data.length;
+      document.getElementById('stat-players').textContent = [...new Set(data.map(e => e.name))].length;
+    }).catch(() => { });
+
+    function renderQuestionsTable(questions) {
+      document.getElementById('q-count').textContent = `${questions.length} questions`;
+      const tbody = document.getElementById('questions-tbody');
+      if (!questions.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No questions found</td></tr>'; return; }
+      tbody.innerHTML = questions.map(q => `
+        <tr>
+          <td><span class="topic-pill">${q.quizId}</span></td>
+          <td style="max-width:280px;font-size:0.85rem">${q.question}</td>
+          <td style="font-size:0.78rem;color:var(--muted)">${q.options.join(', ')}</td>
+          <td style="color:var(--green);font-size:0.85rem">${q.options[q.correctIndex]}</td>
+          <td style="display:flex;gap:0.4rem">
+            <button class="btn-delete" onclick="deleteQuestion('${q.id}','${q.quizId}')">Delete</button>
+          </td>
+        </tr>`).join('');
+    }
+
+    function addQuestion() {
+      const quizId = document.getElementById('add-quiz-id').value;
+      const question = document.getElementById('add-question').value.trim();
+      const options = [0, 1, 2, 3].map(i => document.getElementById(`opt-${i}`).value.trim());
+      const correctIndex = parseInt(document.getElementById('add-correct').value);
+      const explanation = document.getElementById('add-explanation').value.trim();
+      const msg = document.getElementById('add-msg');
+
+      if (!quizId || !question || options.some(o => !o)) {
+        msg.style.display = 'block'; msg.style.color = 'var(--red)'; msg.textContent = 'Please fill all required fields.'; return;
+      }
+      fetch('/api/admin/questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': localStorage.getItem("adminToken")
+        },
+        body: JSON.stringify({ quizId, question, options, correctIndex, explanation })
+      })
+        .then(r => r.json())
+        .then(data => {
+          msg.style.display = 'block'; msg.style.color = 'var(--green)'; msg.textContent = '✓ Question added successfully!';
+          allQuestions.push(data);
+          clearForm();
+          setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        })
+        .catch(() => { msg.style.display = 'block'; msg.style.color = 'var(--red)'; msg.textContent = 'Failed to add question.'; });
+    }
+
+    function deleteQuestion(id, quizId) {
+      if (!confirm('Delete this question?')) return;
+      fetch(`/api/admin/questions/${quizId}/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'x-admin-token': localStorage.getItem("adminToken")
+        }
+      })
+        .then(() => {
+          allQuestions = allQuestions.filter(q => q.id !== id);
+          renderQuestionsTable(allQuestions);
+          document.getElementById('stat-questions').textContent = allQuestions.length;
+        }).catch(() => alert('Failed to delete'));
+    }
+
+    function clearForm() {
+      ['add-question', 'add-explanation', 'opt-0', 'opt-1', 'opt-2', 'opt-3'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('add-quiz-id').value = '';
+    }
+
+    function loadLBTab() {
+      fetch('/api/leaderboard').then(r => r.json()).then(data => {
+        const sorted = data.sort((a, b) => b.percentage - a.percentage);
+        const tbody = document.getElementById('lb-admin-tbody');
+        if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No entries yet</td></tr>'; return; }
+        tbody.innerHTML = sorted.map((e, i) => `
+          <tr>
+            <td style="color:var(--muted)">${i + 1}</td>
+            <td>${e.name}</td>
+            <td><span class="topic-pill">${e.quizTitle || e.quizId}</span></td>
+            <td>${e.correct}/${e.total}</td>
+            <td style="color:var(--accent2)">${e.percentage}%</td>
+            <td style="color:var(--muted);font-size:0.78rem">${new Date(e.timestamp).toLocaleDateString()}</td>
+            <td><button class="btn-delete" onclick="deleteLBEntry('${e.id}')">Delete</button></td>
+          </tr>`).join('');
+      });
+    }
+
+    function clearLeaderboard() {
+      if (!confirm('Clear all leaderboard entries?')) return;
+      fetch('/api/leaderboard/clear', { method: 'DELETE' })
+        .then(() => loadLBTab())
+        .catch(() => alert('Failed'));
+    }
+
+    function deleteLBEntry(id) {
+      fetch(`/api/leaderboard/${id}`, { method: 'DELETE' })
+        .then(() => loadLBTab())
+        .catch(() => alert('Failed'));
+    }
+
+    function login() {
+      const password = document.getElementById('admin-pass').value;
+
+      fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            localStorage.setItem("adminToken", data.token);
+
+            // hide login, show panel
+            document.getElementById('admin-login').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+          } else {
+            alert("Wrong password");
+          }
+        });
+    }
+    const token = localStorage.getItem("adminToken");
+
+    if (token) {
+      document.getElementById('admin-login').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+    }
+  </script>
+</body>
+
+</html>
