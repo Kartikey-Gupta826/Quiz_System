@@ -182,6 +182,7 @@
     </footer>
   </div>
   <script>
+    const BASE_URL = "https://quiz-system-xeiz.onrender.com";
     let allQuizzes = [], allQuestions = [];
 
     function switchTab(name) {
@@ -194,7 +195,7 @@
     }
 
     // Load quizzes & questions
-    Promise.all([fetch('/api/quizzes').then(r => r.json()), fetch('/api/admin/questions').then(r => r.json())])
+    Promise.all([fetch('${BASE_URL}/api/quizzes').then(r => r.json()), fetch('${BASE_URL}/api/admin/questions').then(r => r.json())])
       .then(([quizzes, questions]) => {
         allQuizzes = quizzes;
         allQuestions = questions;
@@ -221,7 +222,7 @@
         document.getElementById('questions-tbody').innerHTML = '<tr><td colspan="5" class="error-msg">Server not running?</td></tr>';
       });
 
-    fetch('/api/leaderboard').then(r => r.json()).then(data => {
+    fetch('${BASE_URL}/api/leaderboard').then(r => r.json()).then(data => {
       document.getElementById('stat-entries').textContent = data.length;
       document.getElementById('stat-players').textContent = [...new Set(data.map(e => e.name))].length;
     }).catch(() => { });
@@ -253,7 +254,7 @@
       if (!quizId || !question || options.some(o => !o)) {
         msg.style.display = 'block'; msg.style.color = 'var(--red)'; msg.textContent = 'Please fill all required fields.'; return;
       }
-      fetch('/api/admin/questions', {
+      fetch('${BASE_URL}/api/admin/questions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -273,7 +274,7 @@
 
     function deleteQuestion(id, quizId) {
       if (!confirm('Delete this question?')) return;
-      fetch(`/api/admin/questions/${quizId}/${id}`, {
+      fetch(`${BASE_URL}/api/admin/questions/${quizId}/${id}`, {
         method: 'DELETE',
         headers: {
           'x-admin-token': localStorage.getItem("adminToken")
@@ -292,7 +293,7 @@
     }
 
     function loadLBTab() {
-      fetch('/api/leaderboard').then(r => r.json()).then(data => {
+      fetch('${BASE_URL}/api/leaderboard').then(r => r.json()).then(data => {
         const sorted = data.sort((a, b) => b.percentage - a.percentage);
         const tbody = document.getElementById('lb-admin-tbody');
         if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No entries yet</td></tr>'; return; }
@@ -311,13 +312,13 @@
 
     function clearLeaderboard() {
       if (!confirm('Clear all leaderboard entries?')) return;
-      fetch('/api/leaderboard/clear', { method: 'DELETE' })
+      fetch('${BASE_URL}/api/leaderboard/clear', { method: 'DELETE' })
         .then(() => loadLBTab())
         .catch(() => alert('Failed'));
     }
 
     function deleteLBEntry(id) {
-      fetch(`/api/leaderboard/${id}`, { method: 'DELETE' })
+      fetch(`${BASE_URL}/api/leaderboard/${id}`, { method: 'DELETE' })
         .then(() => loadLBTab())
         .catch(() => alert('Failed'));
     }
@@ -325,7 +326,7 @@
     function login() {
       const password = document.getElementById('admin-pass').value;
 
-      fetch('/api/admin/login', {
+      fetch('${BASE_URL}/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

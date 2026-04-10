@@ -41,6 +41,7 @@
   </footer>
 
   <script>
+    const BASE_URL = "https://quiz-system-xeiz.onrender.com";
     let allEntries = [];
     let activeFilter = 'all';
 
@@ -107,7 +108,7 @@
       </table>`;
     }
 
-    fetch('/api/leaderboard')
+    fetch('${BASE_URL}/api/leaderboard')
       .then(r => r.json())
       .then(data => {
         allEntries = data.sort((a, b) => b.percentage - a.percentage || b.correct - a.correct);

@@ -37,6 +37,7 @@
   </footer>
 
   <script>
+    const BASE_URL = "https://quiz-system-xeiz.onrender.com";
     const scores = JSON.parse(localStorage.getItem('quizhub_scores') || '[]');
     const filterBar = document.getElementById('filter-bar');
     const quizList = document.getElementById('quiz-list');
@@ -69,7 +70,7 @@
       }).join('') : '<p class="empty-state">No quizzes found.</p>';
     }
 
-    fetch('/api/quizzes')
+    fetch('${BASE_URL}/api/quizzes')
       .then(r => r.json())
       .then(data => {
         allQuizzes = data;

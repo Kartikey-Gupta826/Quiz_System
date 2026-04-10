@@ -75,6 +75,7 @@
   </div>
 
   <script>
+    const BASE_URL = "https://quiz-system-xeiz.onrender.com";
     const params = new URLSearchParams(window.location.search);
     const quizId = params.get('id');
     if (!quizId) window.location.href = 'quiz-list.html';
@@ -90,7 +91,7 @@
     let userAnswers = [];
 
     // Load quiz meta
-    fetch(`/api/quizzes/${quizId}`)
+    fetch(`${BASE_URL}/api/quizzes/${quizId}`)
       .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
       .then(data => {
         quiz = data;
@@ -114,7 +115,7 @@
       }
       document.getElementById('name-error').style.display = 'none';
 
-      fetch(`/api/quizzes/${quizId}/questions`)
+      fetch(`${BASE_URL}/api/quizzes/${quizId}/questions`)
         .then(r => r.json())
         .then(data => {
           questions = data;
@@ -238,7 +239,7 @@
       localStorage.setItem('quizhub_scores', JSON.stringify(localScores));
 
       // Post to server leaderboard
-      fetch('/api/leaderboard', {
+      fetch('${BASE_URL}/api/leaderboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entry)
