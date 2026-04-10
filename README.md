@@ -3,7 +3,7 @@
 > **Web Technologies Lab – PBL Mini Project**  
 > Department of Computer Science and Engineering  
 > Bharati Vidyapeeth's College of Engineering, New Delhi  
-> Faculty: Mohit Tiwari
+> Faculty: Mr. Mohit Tiwari
 
 ---
 
