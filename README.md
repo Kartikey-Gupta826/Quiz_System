@@ -199,14 +199,13 @@ npm run dev
 
 ## 👥 Team
 
-| Member | Roll No | Responsibility |
-|--------|---------|----------------|
-| [Name 1] | [Roll] | Frontend + UI/UX |
-| [Name 2] | [Roll] | Backend + API |
-| [Name 3] | [Roll] | Testing + Documentation |
+| Member   | Roll No.    |
+|----------|-------------|
+| Kartikey | 08811502723 |
+| Uneeb    | 09111502723 |
 
 ---
 
 ## 📄 License
 
-MIT – Free for academic use.
+Free for academic use.
