@@ -1,5 +1,8 @@
 # QuizHub – Online Quiz Platform
 
+Project Link: https://quiz-system-nu-five.vercel.app/
+( Admin password is: Kat123 )
+
 > **Web Technologies Lab – PBL Mini Project**  
 > Department of Computer Science and Engineering  
 > Bharati Vidyapeeth's College of Engineering, New Delhi  
@@ -90,7 +93,9 @@ For development with auto-restart:
 ```bash
 npm run dev
 ```
-
+To access Admin system :
+* Create an env file
+* Write your password in it.
 ---
 
 ## 🌐 API Endpoints
