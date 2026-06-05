@@ -2,12 +2,6 @@
 
 Project Link: https://quiz-system-nu-five.vercel.app/
 ( Admin password is: Kat123 )
-
-> **Web Technologies Lab – PBL Mini Project**  
-> Department of Computer Science and Engineering  
-> Bharati Vidyapeeth's College of Engineering, New Delhi  
-> Faculty: Mr. Mohit Tiwari
-
 ---
 
 ## 🎯 Project Overview
@@ -199,15 +193,6 @@ To access Admin system :
 6. **Performance Analytics** – Charts showing weak topics per user
 7. **Dark/Light Mode Toggle**
 8. **Export Results as PDF**
-
----
-
-## 👥 Team
-
-| Member   | Roll No.    |
-|----------|-------------|
-| Kartikey | 08811502723 |
-| Uneeb    | 09111502723 |
 
 ---
 
